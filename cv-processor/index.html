@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CaseLynx CV Processor</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #FCF9F2;
+      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+    }
+
+    header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .logo {
+      height: 36px;
+      margin-bottom: 8px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      color: #2C39DB;
+      letter-spacing: -0.3px;
+    }
+
+    .card {
+      background: #fff;
+      border: 1px solid #e8e3d8;
+      border-radius: 12px;
+      padding: 36px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    }
+
+    .field {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #444;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 15px;
+      font-family: inherit;
+      background: #FAFAFA;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    input[type="text"]:focus {
+      border-color: #2C39DB;
+      background: #fff;
+    }
+
+    /* Drop zone */
+    .dropzone {
+      border: 2px dashed #c5bfb0;
+      border-radius: 10px;
+      background: #FDFAF4;
+      padding: 36px 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      position: relative;
+    }
+
+    .dropzone.drag-over {
+      border-color: #2C39DB;
+      background: #f0f2ff;
+    }
+
+    .dropzone.has-file {
+      border-color: #2C39DB;
+      border-style: solid;
+      background: #f0f2ff;
+    }
+
+    .dropzone input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    .drop-icon {
+      font-size: 28px;
+      margin-bottom: 10px;
+    }
+
+    .drop-label {
+      font-size: 14px;
+      color: #666;
+      line-height: 1.5;
+    }
+
+    .drop-label strong {
+      color: #2C39DB;
+    }
+
+    .file-name {
+      font-size: 13px;
+      color: #2C39DB;
+      font-weight: 600;
+      margin-top: 8px;
+    }
+
+    /* Options */
+    .options {
+      margin-bottom: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .option-row input[type="checkbox"] {
+      margin-top: 2px;
+      accent-color: #2C39DB;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+
+    .option-row input[type="checkbox"]:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .option-text {
+      font-size: 14px;
+      color: #333;
+      line-height: 1.4;
+    }
+
+    .option-text .locked-badge {
+      font-size: 11px;
+      background: #e8eaff;
+      color: #2C39DB;
+      border-radius: 4px;
+      padding: 1px 6px;
+      margin-left: 6px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+      vertical-align: middle;
+    }
+
+    .option-warning {
+      font-size: 12px;
+      color: #b45309;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Button */
+    .btn {
+      width: 100%;
+      padding: 13px;
+      background: #2C39DB;
+      color: #fff;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, opacity 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn:hover:not(:disabled) { background: #2230c4; }
+    .btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    /* Spinner */
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Messages */
+    .message {
+      margin-top: 16px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      line-height: 1.5;
+      display: none;
+    }
+
+    .message.error {
+      background: #fff1f0;
+      border: 1px solid #fca5a5;
+      color: #991b1b;
+    }
+
+    .message.success {
+      background: #f0fdf4;
+      border: 1px solid #86efac;
+      color: #166534;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <img class="logo" src="https://caselynx.co/logo.svg" alt="CaseLynx"
+         onerror="this.style.display='none'; document.querySelector('.logo-text').style.display='block'">
+    <div class="logo-text" style="display:none; font-size:22px; font-weight:700; color:#2C39DB; margin-bottom:8px;">CaseLynx</div>
+    <h1>CV Processor</h1>
+  </header>
+
+  <div class="card">
+
+    <div class="field">
+      <label for="last-name">Doctor's Last Name</label>
+      <input type="text" id="last-name" placeholder="e.g. Shivkumar" autocomplete="off" />
+    </div>
+
+    <div class="field">
+      <label>CV File</label>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="file-input" accept=".pdf,.docx" />
+        <div class="drop-icon">📄</div>
+        <div class="drop-label">
+          <strong>Click to upload</strong> or drag and drop<br>
+          PDF or DOCX only
+        </div>
+        <div class="file-name" id="file-name"></div>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Processing Options</label>
+      <div class="options">
+
+        <div class="option-row">
+          <input type="checkbox" id="opt-logo" checked disabled />
+          <div>
+            <div class="option-text">
+              Add CaseLynx logo
+              <span class="locked-badge">always on</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="option-row">
+          <input type="checkbox" id="opt-footer" checked disabled />
+          <div>
+            <div class="option-text">
+              Add footer to every page
+              <span class="locked-badge">always on</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="option-row">
+          <input type="checkbox" id="opt-redact" />
+          <div>
+            <div class="option-text">Remove contact info</div>
+            <div class="option-warning">⚠️ Review output carefully — may affect formatting</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <button class="btn" id="submit-btn" disabled>
+      <span class="spinner" id="spinner"></span>
+      <span id="btn-label">Process CV</span>
+    </button>
+
+    <div class="message" id="message"></div>
+
+  </div>
+
+  <script>
+    const dropzone   = document.getElementById('dropzone');
+    const fileInput  = document.getElementById('file-input');
+    const fileNameEl = document.getElementById('file-name');
+    const lastNameEl = document.getElementById('last-name');
+    const submitBtn  = document.getElementById('submit-btn');
+    const spinner    = document.getElementById('spinner');
+    const btnLabel   = document.getElementById('btn-label');
+    const messageEl  = document.getElementById('message');
+    const optRedact  = document.getElementById('opt-redact');
+
+    const API_URL = 'https://caselynx-doctor-onboarding-production.up.railway.app/process-cv';
+
+    let selectedFile = null;
+
+    function updateSubmitState() {
+      submitBtn.disabled = !(selectedFile && lastNameEl.value.trim());
+    }
+
+    function showFile(file) {
+      selectedFile = file;
+      fileNameEl.textContent = file.name;
+      dropzone.classList.add('has-file');
+      updateSubmitState();
+    }
+
+    // File input change
+    fileInput.addEventListener('change', () => {
+      if (fileInput.files[0]) showFile(fileInput.files[0]);
+    });
+
+    // Drag and drop
+    dropzone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropzone.classList.add('drag-over');
+    });
+
+    dropzone.addEventListener('dragleave', () => {
+      dropzone.classList.remove('drag-over');
+    });
+
+    dropzone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropzone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+      const ext = file.name.split('.').pop().toLowerCase();
+      if (!['pdf', 'docx'].includes(ext)) {
+        showMessage('error', 'Only PDF and DOCX files are accepted.');
+        return;
+      }
+      showFile(file);
+    });
+
+    lastNameEl.addEventListener('input', updateSubmitState);
+
+    function showMessage(type, text) {
+      messageEl.className = 'message ' + type;
+      messageEl.textContent = text;
+      messageEl.style.display = 'block';
+    }
+
+    function setLoading(loading) {
+      submitBtn.disabled = loading;
+      spinner.style.display = loading ? 'block' : 'none';
+      btnLabel.textContent = loading ? 'Processing…' : 'Process CV';
+    }
+
+    submitBtn.addEventListener('click', async () => {
+      if (!selectedFile || !lastNameEl.value.trim()) return;
+
+      messageEl.style.display = 'none';
+      setLoading(true);
+
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('remove_contact_info', optRedact.checked ? 'true' : 'false');
+
+      try {
+        const res = await fetch(API_URL, { method: 'POST', body: formData });
+
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          throw new Error(err.error || `Server returned ${res.status}`);
+        }
+
+        const blob = await res.blob();
+        const lastName = lastNameEl.value.trim().replace(/\s+/g, '_');
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${lastName}_CV_CaseLynx.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+
+        showMessage('success', 'Done! Your file is downloading.');
+      } catch (err) {
+        const msg = err.message.includes('Failed to fetch')
+          ? 'Could not reach the server. Check your connection and try again.'
+          : `Something went wrong: ${err.message}`;
+        showMessage('error', msg);
+      } finally {
+        setLoading(false);
+        updateSubmitState();
+      }
+    });
+  </script>
+
+</body>
+</html>
