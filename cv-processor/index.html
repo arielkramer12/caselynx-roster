@@ -262,11 +262,11 @@
     <div class="field">
       <label>CV File</label>
       <div class="dropzone" id="dropzone">
-        <input type="file" id="file-input" accept=".pdf,.docx" />
+        <input type="file" id="file-input" accept=".pdf,.doc,.docx" />
         <div class="drop-icon">📄</div>
         <div class="drop-label">
           <strong>Click to upload</strong> or drag and drop<br>
-          PDF or DOCX only
+          PDF, DOC, or DOCX only
         </div>
         <div class="file-name" id="file-name"></div>
       </div>
@@ -364,8 +364,8 @@
       const file = e.dataTransfer.files[0];
       if (!file) return;
       const ext = file.name.split('.').pop().toLowerCase();
-      if (!['pdf', 'docx'].includes(ext)) {
-        showMessage('error', 'Only PDF and DOCX files are accepted.');
+      if (!['pdf', 'doc', 'docx'].includes(ext)) {
+        showMessage('error', 'Only PDF, DOC, and DOCX files are accepted.');
         return;
       }
       showFile(file);
